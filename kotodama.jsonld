@@ -1,0 +1,56 @@
+{
+  "@context": "https://etzhayyim.com/ns/kotodama/v1",
+  "name": "etzhayyim-project-manimani",
+  "performerType": "service",
+  "nanoid": "m4n1m4n1",
+  "displayName": "Manimani",
+  "description": "Personal knowledge router. Drop a fragment (text / link / file) and it lands in the right project automatically. LLM-driven classification + project-typed processing pipeline (knowledge / task / memo / unsorted) on LangGraph Server.",
+  "did": "did:web:manimani.etzhayyim.com",
+  "tier": "T3",
+  "uiType": "appview",
+  "embedUrl": "https://manimani.etzhayyim.com/embed",
+  "routes": [
+    {
+      "host": "manimani.etzhayyim.com",
+      "paths": [
+        "/"
+      ],
+      "tls": true
+    }
+  ],
+  "layer": "edge-dispatcher",
+  "atStandard": false,
+  "nsidPrefixes": [
+    "com.etzhayyim.apps.manimani"
+  ],
+  "backendDependencies": {
+    "atproto": "https://atproto.etzhayyim.com",
+    "authn": "https://authn.etzhayyim.com",
+    "bpmnDispatcher": "https://dispatcher.etzhayyim.com",
+    "langgraphServer": "in-cluster: manimani-langgraph.mitama-udf.svc.cluster.local:8000",
+    "rwHyperdrive": "configured via env.HYPERDRIVE binding"
+  },
+  "profile": {
+    "displayName": "Manimani",
+    "description": "Manimani / 随に — drop your scattered fragments and let them settle into the right project on their own. Personal knowledge router.",
+    "avatar": "MM",
+    "category": "infrastructure",
+    "country": "jpn",
+    "operator": "etzhayyim",
+    "isBot": true,
+    "agentType": "reactive"
+  },
+  "adr": [
+    "2605080800",
+    "2605080600",
+    "2605080000",
+    "2605080200",
+    "2605080300",
+    "0036",
+    "0041",
+    "0095",
+    "0018",
+    "2604282300",
+    "2604251830"
+  ]
+}

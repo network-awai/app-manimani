@@ -1,0 +1,44 @@
+{
+  "name": "kotodama-m4n1m4n1",
+  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2025-03-17",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_als"
+  ],
+  "assets": {
+    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  },
+  "vars": {
+    "APP_CAPABILITIES": "null",
+    "APP_DESCRIPTION": "Manimani / 随に — drop your scattered fragments and let them settle into the right project on their own. Personal knowledge router.",
+    "APP_DISPLAY_NAME": "Manimani",
+    "APP_EMBED_URL": "https://manimani.etzhayyim.com/embed",
+    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_NANOID": "m4n1m4n1",
+    "APP_PERFORMER_TYPE": "",
+    "APP_UI_TYPE": "appview",
+    "AGENTGATEWAY_MCP_ROUTER_URL": "https://mcp.etzhayyim.com/xrpc/com.etzhayyim.mcp.message"
+  },
+  "rules": [
+    {
+      "type": "CompiledWasm",
+      "globs": [
+        "**/*.wasm"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "m4n1m4n1.etzhayyim.com/*",
+      "zone_name": "etzhayyim.com"
+    },
+    {
+      "pattern": "manimani.etzhayyim.com/*",
+      "zone_name": "etzhayyim.com"
+    }
+  ]
+}
