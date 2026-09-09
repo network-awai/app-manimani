@@ -83,7 +83,7 @@ manimani-langgraph (mitama-manimani-pool, Granian :8000)
 ```bash
 cd 60-apps/etzhayyim-project-manimani
 wrangler secret put DISPATCHER_INTERNAL_SECRET  # shared with K8s bpmn-dispatcher-auth
-etzhayyim deploy --no-svelte
+etzhayyim deploy
 ```
 
 ## Smoke

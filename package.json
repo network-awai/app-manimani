@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/app.ts",
   "scripts": {
-    "deploy": "etzhayyim deploy --no-svelte",
+    "deploy": "etzhayyim deploy",
     "smoke": "curl -s https://manimani.etzhayyim.com/health"
   },
   "dependencies": {
