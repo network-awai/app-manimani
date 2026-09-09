@@ -1,13 +1,40 @@
 {
+  // NOTE: this app used to be built by SvelteKit's @sveltejs/adapter-cloudflare,
+  // which emitted a single Worker script (`main`, at
+  // `svelte/.svelte-kit/cloudflare/_worker.js`) bundling both the
+  // `/xrpc/[...path]` MCP-router proxy
+  // (`svelte/src/routes/xrpc/[...path]/+server.ts`) and the static client
+  // bundle for the `+page.svelte` status page. The frontend was migrated to
+  // a plain ClojureScript (shadow-cljs + reagent + re-frame + jp-go-dds)
+  // static bundle with no server-rendering step — see cljs/ and this repo's
+  // README.
+  //
+  // `main` is intentionally REMOVED rather than pointed at `src/app.ts`
+  // (this repo's pre-existing thin edge Worker, unrelated to the SvelteKit
+  // BFF): `src/app.ts` does not call `env.ASSETS.fetch()`, so pointing
+  // `main` at it would put a Worker in front of the assets below and serve
+  // nothing for the static bundle. Without a `main`, this config is
+  // assets-only — Cloudflare serves `assets.directory` directly and no
+  // Worker script runs in front of it. That means `src/app.ts`'s own
+  // `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root CLAUDE.md) are
+  // NOT reachable through this deploy config either; whether/how to wire a
+  // Worker back in front of these assets is a separate, open product
+  // decision this frontend migration does not make.
+  //
+  // The Svelte-era `/xrpc/[...path]` → AgentGateway MCP-router proxy is
+  // preserved byte-for-byte (moved, not deleted) at `src/xrpc-proxy.ts` —
+  // see that file's own header comment. It is NOT wired into anything.
+  //
+  // This edit is UNVERIFIED: `wrangler deploy`/`wrangler dev` were not run
+  // against it as part of this migration.
   "name": "kotodama-m4n1m4n1",
-  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
   "compatibility_date": "2025-03-17",
   "compatibility_flags": [
     "nodejs_compat",
     "nodejs_als"
   ],
   "assets": {
-    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "directory": "./cljs/public",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
@@ -17,7 +44,7 @@
     "APP_DESCRIPTION": "Manimani / 随に — drop your scattered fragments and let them settle into the right project on their own. Personal knowledge router.",
     "APP_DISPLAY_NAME": "Manimani",
     "APP_EMBED_URL": "https://manimani.etzhayyim.com/embed",
-    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_FRAMEWORK": "cljs-reagent-re-frame-jp-go-dds",
     "APP_NANOID": "m4n1m4n1",
     "APP_PERFORMER_TYPE": "",
     "APP_UI_TYPE": "appview",

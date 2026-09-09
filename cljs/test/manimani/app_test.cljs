@@ -1,0 +1,44 @@
+(ns manimani.app-test
+  (:require [cljs.test :refer [deftest is testing use-fixtures]]
+            [re-frame.core :as rf]
+            [re-frame.db :as rf-db]
+            [manimani.app :as app]))
+
+(use-fixtures :each
+  {:before (fn [] (rf/clear-subscription-cache!) (reset! rf-db/app-db {}))})
+
+(deftest initialize-db-sets-defaults
+  (testing ":initialize-db populates every fact the Svelte scaffold held"
+    (rf/dispatch-sync [:initialize-db])
+    (is (= app/default-db @rf-db/app-db))
+    (is (= "Ai etzhayyim Project Manimani" @(rf/subscribe [:app/title])))
+    (is (= "etzhayyim-project-manimani" @(rf/subscribe [:app/name])))
+    (is (= "etzhayyim-project-manimani" @(rf/subscribe [:app/project])))
+    (is (= "cloudflare surface" @(rf/subscribe [:app/kind])))
+    (is (= 0 @(rf/subscribe [:app/route-count])))
+    (is (= [] @(rf/subscribe [:app/routes])))
+    (is (= 0 (count @(rf/subscribe [:app/vars]))))
+    (is (true? @(rf/subscribe [:app/xrpc?])))
+    (is (= "cljs/src/manimani/app.cljs"
+           @(rf/subscribe [:app/relative-path])))))
+
+(deftest routes-sub-reflects-db
+  (testing ":app/routes reads whatever is in the db, not a fixed value"
+    (reset! rf-db/app-db {:app/routes ["only-one.example.com/*"]})
+    (is (= ["only-one.example.com/*"] @(rf/subscribe [:app/routes])))))
+
+(deftest vars-sub-reflects-db
+  (testing ":app/vars reads whatever is in the db, not a fixed value"
+    (reset! rf-db/app-db {:app/vars ["SOME_VAR"]})
+    (is (= ["SOME_VAR"] @(rf/subscribe [:app/vars])))))
+
+(deftest xrpc-sub-reflects-db
+  (testing ":app/xrpc? reads whatever is in the db, not a fixed value"
+    (reset! rf-db/app-db {:app/xrpc? false})
+    (is (false? @(rf/subscribe [:app/xrpc?])))))
+
+(deftest initialize-db-overwrites-prior-state
+  (testing ":initialize-db resets to defaults even if the db already had other data"
+    (reset! rf-db/app-db {:app/title "stale" :app/xrpc? false :unrelated 42})
+    (rf/dispatch-sync [:initialize-db])
+    (is (= app/default-db @rf-db/app-db))))

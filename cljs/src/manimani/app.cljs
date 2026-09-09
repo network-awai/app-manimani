@@ -1,0 +1,156 @@
+(ns manimani.app
+  "app-manimani appview — reagent + re-frame, view built from jp-go-dds
+  (デジタル庁デザインシステム) hiccup.
+
+  Faithful port of the previous SvelteKit scaffold's status page
+  (`svelte/src/routes/+page.svelte`, 84 lines): a static display of this
+  Worker's own declared surface — title / project / name / kind, route
+  count + list, wrangler var keys, an XRPC-enabled flag, and its own
+  source path. Every field below mirrors the constant `app` object
+  `+page.svelte` held in its <script> block; nothing here is invented and
+  nothing is simplified away — including the routeCount 0 / routes []
+  and vars [] mismatch against this repo's wrangler.jsonc (which does
+  declare two routes and nine vars): that mismatch pre-existed in the
+  Svelte page and is ported as-is, not corrected, because this is a
+  frontend migration, not a data audit. Likewise `kind` is ported as the
+  literal string \"cloudflare surface\" even though it reads redundantly
+  next to the fixed 'Cloudflare' lead-in (\"Cloudflare cloudflare
+  surface\") — that is what the Svelte source said.
+
+  One field is updated, not simplified, to stay honest about what this
+  migration itself changed:
+
+  - `:app/relative-path` now names this file, not the deleted Svelte one.
+
+  `:app/xrpc?` is ported unchanged as `true` (the Svelte source's literal
+  value), but what it now describes is different from what it described
+  before, and this migration does not repair that gap:
+
+  - Pre-migration, this repo's `wrangler.jsonc` pointed `main` at the
+    SvelteKit adapter's bundled Worker
+    (`svelte/.svelte-kit/cloudflare/_worker.js`), which embedded the
+    `/xrpc/[...path]` → AgentGateway MCP-router proxy
+    (`svelte/src/routes/xrpc/[...path]/+server.ts`, JSON-RPC
+    `tools/call`). That handler is preserved byte-for-byte at
+    `src/xrpc-proxy.ts` (moved, not deleted) but does not compile as-is
+    (it still imports `@sveltejs/kit` and a generated `./$types`) and is
+    NOT wired into anything.
+  - This migration's `wrangler.jsonc` has no `main` key at all: `src/app.ts`
+    (this repo's pre-existing thin edge Worker, unrelated to the SvelteKit
+    BFF) does not call `env.ASSETS.fetch()`, so pointing `main` at it would
+    put a Worker in front of the static bundle and serve nothing — see that
+    file and the repo README. So, unlike the `kotoba-lang/meet` appview's
+    equivalent migration (where `main` could point at an `app.ts` that
+    genuinely does both `ASSETS.fetch` and XRPC), this deploy config is
+    assets-only: no Worker script runs in front of this bundle post-
+    migration, and neither the old SvelteKit proxy nor `src/app.ts`'s own
+    `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root `CLAUDE.md`)
+    are reachable through it. Reconciling `:app/xrpc?` with that fact, or
+    wiring a Worker back in front of the assets, is an open product
+    decision this frontend migration does not make.
+
+  `public/index.html`'s inlined <style> was produced once, at authoring
+  time, by `jp-go-dds.page/->page` running on the JVM (via this deps.edn's
+  jp-go-dds git/sha), concatenating the vendored `dds.css` with
+  `jp-go-dds.core/ext-css` — exactly what `jp-go-dds.page/page` composes
+  for its own <style> block. This namespace only requires
+  `jp-go-dds.core` — the browser bundle does not need `jp-go-dds.page` or
+  `html.core` at runtime; those are JVM-only tools used to author the
+  static shell once. Regenerate that shell (e.g. if jp-go-dds's core
+  components or ext-rules change) with:
+
+    (require '[jp-go-dds.page :as page] '[clojure.java.io :as io])
+    (spit \"public/index.html\"
+          (page/->page {:title \"Manimani\"
+                         :lang \"ja\"
+                         :description \"Manimani / 随に — drop your scattered fragments and let them settle into the right project on their own. Personal knowledge router.\"
+                         :css (slurp (io/resource \"jp_go_dds/dds.css\"))}
+                        [:div {:id \"app\"} \"manimani loading…\"]
+                        [:script {:src \"js/app.js\"}]))"
+  (:require [reagent.dom :as rdom]
+            [re-frame.core :as rf]
+            [jp-go-dds.core :as dds]))
+
+;; -- db ------------------------------------------------------------------
+;;
+;; Same nine facts + own source path that `+page.svelte`'s `app` const
+;; held (title/project/name/kind/routeCount/routes/vars/xrpc/relativePath).
+
+(def default-db
+  {:app/title "Ai etzhayyim Project Manimani"
+   :app/project "etzhayyim-project-manimani"
+   :app/name "etzhayyim-project-manimani"
+   :app/kind "cloudflare surface"
+   :app/route-count 0
+   :app/routes []
+   :app/vars []
+   :app/xrpc? true
+   :app/relative-path "cljs/src/manimani/app.cljs"})
+
+(rf/reg-event-db
+ :initialize-db
+ (fn [_ _] default-db))
+
+(rf/reg-sub :app/title (fn [db _] (:app/title db)))
+(rf/reg-sub :app/project (fn [db _] (:app/project db)))
+(rf/reg-sub :app/name (fn [db _] (:app/name db)))
+(rf/reg-sub :app/kind (fn [db _] (:app/kind db)))
+(rf/reg-sub :app/route-count (fn [db _] (:app/route-count db)))
+(rf/reg-sub :app/routes (fn [db _] (:app/routes db)))
+(rf/reg-sub :app/vars (fn [db _] (:app/vars db)))
+(rf/reg-sub :app/xrpc? (fn [db _] (:app/xrpc? db)))
+(rf/reg-sub :app/relative-path (fn [db _] (:app/relative-path db)))
+
+;; -- view ------------------------------------------------------------------
+
+(defn app-view []
+  (let [title         @(rf/subscribe [:app/title])
+        name          @(rf/subscribe [:app/name])
+        kind          @(rf/subscribe [:app/kind])
+        project       @(rf/subscribe [:app/project])
+        route-count   @(rf/subscribe [:app/route-count])
+        routes        @(rf/subscribe [:app/routes])
+        vars          @(rf/subscribe [:app/vars])
+        xrpc?         @(rf/subscribe [:app/xrpc?])
+        relative-path @(rf/subscribe [:app/relative-path])]
+    (dds/container
+
+     [:section {:class "dds-ext-section"}
+      [:p {:class "dds-ext-lead"} (str "Cloudflare " kind)]
+      (dds/heading 1 title)
+      [:span {:class "dads-u-mono-16N-150"} name]]
+
+     [:section {:class "dds-ext-section"}
+      (dds/grid {:min "12rem"}
+        (dds/card [:p {:class "dds-ext-lead"} "Project"] [:strong project])
+        (dds/card [:p {:class "dds-ext-lead"} "Routes"] [:strong (str route-count)])
+        (dds/card [:p {:class "dds-ext-lead"} "XRPC"]
+                  [:strong (if xrpc? "enabled" "not configured")]))]
+
+     [:section {:class "dds-ext-section"}
+      (dds/heading 2 "Public Routes" {:size "24"})
+      (if (seq routes)
+        (dds/card
+         (into [:ul {:class "dds-ext-stack"}]
+               (map (fn [r] [:li {:class "dads-u-mono-16N-150"} r]) routes)))
+        [:p {:class "dds-ext-lead"} "No public route is declared next to this app surface."])]
+
+     [:section {:class "dds-ext-section"}
+      (dds/heading 2 "Runtime Bindings" {:size "24"})
+      (if (seq vars)
+        (into [:div {:class "dds-ext-row"}]
+              (map (fn [v] (dds/chip-label v {:color "blue"})) vars))
+        [:p {:class "dds-ext-lead"} "No public vars are declared in the nearest wrangler config."])]
+
+     [:section {:class "dds-ext-section"}
+      (dds/heading 2 "Source" {:size "24"})
+      [:p {:class "dads-u-mono-16N-150"} relative-path]])))
+
+;; -- mount -------------------------------------------------------------------
+
+(defn render []
+  (rdom/render [app-view] (.getElementById js/document "app")))
+
+(defn ^:export main []
+  (rf/dispatch-sync [:initialize-db])
+  (render))

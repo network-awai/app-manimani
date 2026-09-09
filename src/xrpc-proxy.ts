@@ -1,3 +1,16 @@
+// SVELTEKIT-BACKEND-PRESERVED: moved out of svelte/ during the cljs migration; not wired.
+//
+// Moved byte-for-byte (imports/body unchanged) from
+// `svelte/src/routes/xrpc/[...path]/+server.ts`, this repo's SvelteKit XRPC
+// proxy handler: it forwarded `/xrpc/*` requests to the AgentGateway MCP
+// router as a JSON-RPC `tools/call`. It still imports `@sveltejs/kit`
+// (`json`, `RequestEvent`) and a SvelteKit-generated `./$types` module that
+// no longer exists now that `svelte/` is deleted, so this file does not
+// compile or run as-is. It is kept only so the handler logic is not lost.
+// `src/app.ts` (the live Cloudflare Worker) does not import or route to
+// this file. Reviving it — porting it onto Hono/`src/app.ts` and rewiring
+// `/xrpc/*` — is an open product decision, not made by this frontend
+// migration (ADR-2608260900).
 import { json, type RequestEvent } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
