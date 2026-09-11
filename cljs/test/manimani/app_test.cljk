@@ -19,7 +19,7 @@
     (is (= [] @(rf/subscribe [:app/routes])))
     (is (= 0 (count @(rf/subscribe [:app/vars]))))
     (is (true? @(rf/subscribe [:app/xrpc?])))
-    (is (= "cljs/src/manimani/app.cljs"
+    (is (= "cljs/src/manimani/app.cljk"
            @(rf/subscribe [:app/relative-path])))))
 
 (deftest routes-sub-reflects-db
