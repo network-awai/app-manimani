@@ -16,7 +16,7 @@
   // nothing for the static bundle. Without a `main`, this config is
   // assets-only — Cloudflare serves `assets.directory` directly and no
   // Worker script runs in front of it. That means `src/app.ts`'s own
-  // `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root CLAUDE.md) are
+  // `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root AGENTS.md) are
   // NOT reachable through this deploy config either; whether/how to wire a
   // Worker back in front of these assets is a separate, open product
   // decision this frontend migration does not make.
