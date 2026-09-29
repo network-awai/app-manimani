@@ -44,7 +44,7 @@
     genuinely does both `ASSETS.fetch` and XRPC), this deploy config is
     assets-only: no Worker script runs in front of this bundle post-
     migration, and neither the old SvelteKit proxy nor `src/app.ts`'s own
-    `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root `CLAUDE.md`)
+    `/xrpc/com.etzhayyim.apps.manimani.*` handlers (see root `AGENTS.md`)
     are reachable through it. Reconciling `:app/xrpc?` with that fact, or
     wiring a Worker back in front of the assets, is an open product
     decision this frontend migration does not make.
